@@ -1131,6 +1131,26 @@ body::before {
   }
 }
 
+/* ===== Data Management ===== */
+.data-management {
+  padding: 4px 0;
+}
+
+.data-management-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.data-management-btns {
+  display: flex;
+  gap: 12px;
+}
+
+.data-management-btns .btn {
+  flex: 1;
+}
+
 /* ===== Utility ===== */
 .mt-8 {
   margin-top: 8px;

@@ -94,6 +94,25 @@
         </div>
         <div id="recent-sessions"></div>
       </div>
+
+      <!-- Data Management -->
+      <div class="card mt-24">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">💾</span> データ管理</div>
+        </div>
+        <div class="data-management">
+          <p class="data-management-desc">トレーニング記録をJSONファイルとしてバックアップ・復元できます。</p>
+          <div class="data-management-btns">
+            <button class="btn btn-secondary" id="btn-export" onclick="exportData()">
+              📤 バックアップ
+            </button>
+            <button class="btn btn-secondary" id="btn-import" onclick="document.getElementById('import-file').click()">
+              📥 復元
+            </button>
+            <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ===== Record Page ===== -->

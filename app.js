@@ -712,6 +712,55 @@ function onChartMetricChange() {
   renderMainChart();
 }
 
+// ==================== DATA EXPORT / IMPORT ====================
+function exportData() {
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    exercises: exercises,
+    sessions: sessions
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `training-memo-backup-${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('バックアップをダウンロードしました', '📤');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.sessions || !data.exercises) {
+        showToast('無効なバックアップファイルです', '⚠️');
+        return;
+      }
+      const count = data.sessions.length;
+      if (!confirm(`${count}件のセッションデータを復元します。\n現在のデータは上書きされます。よろしいですか？`)) {
+        return;
+      }
+      exercises = data.exercises;
+      sessions = data.sessions;
+      saveData();
+      renderDashboard();
+      showToast(`${count}件のセッションを復元しました！`, '📥');
+    } catch {
+      showToast('ファイルの読み込みに失敗しました', '⚠️');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
 // ==================== HELPERS ====================
 function formatDate(dateStr) {
   const d = new Date(dateStr);
