@@ -5,6 +5,16 @@
 // ==================== DATA & CONSTANTS ====================
 const BODY_PARTS = ['胸', '背中', '肩', '腕', '脚', '腹'];
 
+// 部位ごとのカラーパレット
+const BODY_PART_COLORS = {
+  '胸': '#e53935',  // Red
+  '背中': '#42a5f5',  // Blue
+  '肩': '#ffa726',  // Orange
+  '腕': '#66bb6a',  // Green
+  '脚': '#ab47bc',  // Purple
+  '腹': '#ffee58',  // Yellow
+};
+
 const DEFAULT_EXERCISES = {
   'ベンチプレス': '胸',
   'インクラインダンベルプレス': '胸',
@@ -160,7 +170,7 @@ function renderBodyPartVolume() {
     return `
       <div class="volume-bar-col">
         <span class="volume-bar-value">${vol >= 1000 ? (vol / 1000).toFixed(1) + 'k' : vol}</span>
-        <div class="volume-bar" style="height: ${Math.max(pct, 4)}%"></div>
+        <div class="volume-bar" style="height: ${Math.max(pct, 4)}%; background: ${BODY_PART_COLORS[bp]}"></div>
         <span class="volume-bar-label">${bp}</span>
       </div>`;
   }).join('');
@@ -670,10 +680,7 @@ function renderVolumeChart() {
       labels: BODY_PARTS,
       datasets: [{
         data: BODY_PARTS.map(bp => volumeByPart[bp]),
-        backgroundColor: [
-          '#e53935', '#ff1744', '#b71c1c',
-          '#ff5252', '#d32f2f', '#c62828'
-        ],
+        backgroundColor: BODY_PARTS.map(bp => BODY_PART_COLORS[bp]),
         borderColor: '#0a0a0a',
         borderWidth: 3,
         hoverOffset: 8,

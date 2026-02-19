@@ -1,5 +1,5 @@
 // Service Worker for Training Memo PWA
-const CACHE_NAME = 'training-memo-v3';
+const CACHE_NAME = 'training-memo-v4';
 const ASSETS = [
     './',
     './index.html',
