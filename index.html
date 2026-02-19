@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="筋トレ記録アプリ - トレーニングメニュー・重量・回数を記録し、成長をグラフで可視化">
+  <title>Training Memo - 筋トレ記録</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e53935">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TrainingMemo">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+</head>
+
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="app-header">
+    <a class="app-logo" href="#" onclick="navigateTo('dashboard')">
+      <span class="logo-icon">🔥</span>
+      <span>TRAINING<span class="logo-accent">MEMO</span></span>
+    </a>
+    <nav>
+      <ul class="nav-tabs">
+        <li class="nav-tab active" data-page="dashboard">
+          <span class="tab-icon">📊</span>
+          <span class="tab-label">ダッシュボード</span>
+        </li>
+        <li class="nav-tab" data-page="record">
+          <span class="tab-icon">✏️</span>
+          <span class="tab-label">記録</span>
+        </li>
+        <li class="nav-tab" data-page="history">
+          <span class="tab-icon">📋</span>
+          <span class="tab-label">履歴</span>
+        </li>
+        <li class="nav-tab" data-page="charts">
+          <span class="tab-icon">📈</span>
+          <span class="tab-label">グラフ</span>
+        </li>
+      </ul>
+    </nav>
+  </header>　
+
+  <!-- ===== Main Content ===== -->
+  <main class="app-main">
+
+    <!-- ===== Dashboard Page ===== -->
+    <section id="dashboard" class="page active">
+      <div class="dashboard-greeting">
+        <h1>🔥 <span>Training</span> Memo</h1>
+        <p>今日もトレーニング頑張りましょう！</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-sessions">0</div>
+          <div class="stat-label">総セッション</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-sets">0</div>
+          <div class="stat-label">総セット数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-volume">0</div>
+          <div class="stat-label">総ボリューム (kg)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-monthly">0</div>
+          <div class="stat-label">今月のセッション</div>
+        </div>
+      </div>
+
+      <!-- Body Part Volume (7 days) -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">💪</span> 過去7日間の部位別ボリューム</div>
+        </div>
+        <div class="volume-bars" id="body-part-volume"></div>
+      </div>
+
+      <!-- Recent Sessions -->
+      <div class="card mt-24">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🕐</span> 最近のセッション</div>
+        </div>
+        <div id="recent-sessions"></div>
+      </div>
+    </section>
+
+    <!-- ===== Record Page ===== -->
+    <section id="record" class="page record-page">
+      <h2><span class="icon">✏️</span> トレーニング記録</h2>
+
+      <div class="card mb-24">
+        <div class="form-group">
+          <label class="form-label" for="record-date">日付</label>
+          <div class="date-input-wrapper">
+            <input type="date" id="record-date" class="form-input">
+            <div class="date-display" id="date-display">
+              <span id="date-display-text">----/--/-- (--)</span>
+              <span class="date-icon">📅</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-between mb-16">
+          <div class="card-title"><span class="icon">🏋️</span> 種目リスト</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-add-custom">＋ カスタム種目</button>
+            <button class="btn btn-primary btn-sm" id="btn-add-exercise">＋ 種目を追加</button>
+          </div>
+        </div>
+
+        <div class="exercise-entries" id="exercise-entries"></div>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="btn-save-session">
+        💾 セッションを保存
+      </button>
+
+      <!-- Hidden template select (used for cloning) -->
+      <select id="exercise-select-template" class="form-select" style="display:none;"></select>
+    </section>
+
+    <!-- ===== History Page ===== -->
+    <section id="history" class="page history-page">
+      <h2><span class="icon">📋</span> トレーニング履歴</h2>
+      <div class="history-filters" id="history-filters"></div>
+      <div class="history-list" id="history-list"></div>
+    </section>
+
+    <!-- ===== Charts Page ===== -->
+    <section id="charts" class="page chart-page">
+      <h2><span class="icon">📈</span> 成長グラフ</h2>
+
+      <!-- Exercise Progress Chart -->
+      <div class="card mb-24">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📊</span> 種目別推移</div>
+        </div>
+        <div class="chart-controls">
+          <div class="form-group">
+            <label class="form-label">種目</label>
+            <select id="chart-exercise-select" class="form-select" onchange="onChartExerciseChange()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">指標</label>
+            <select id="chart-metric-select" class="form-select" onchange="onChartMetricChange()">
+              <option value="max-weight">最大重量</option>
+              <option value="total-volume">総ボリューム</option>
+              <option value="max-reps">最大回数</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-container" style="height:350px;">
+          <canvas id="main-chart"></canvas>
+          <div class="chart-placeholder" id="chart-placeholder">
+            <div class="placeholder-icon">📈</div>
+            <p>種目を選択すると成長グラフが表示されます</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Volume Distribution Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🎯</span> 部位別ボリューム分布</div>
+        </div>
+        <div class="chart-container" style="height:350px;">
+          <canvas id="volume-chart"></canvas>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== Custom Exercise Modal ===== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h3><span class="icon">➕</span> カスタム種目追加</h3>
+      <div class="form-group">
+        <label class="form-label">メニュー名</label>
+        <input type="text" id="custom-name" class="form-input" placeholder="例: ケーブルクロスオーバー">
+      </div>
+      <div class="form-group">
+        <label class="form-label">部位</label>
+        <select id="custom-bodypart" class="form-select">
+          <option value="胸">胸</option>
+          <option value="背中">背中</option>
+          <option value="肩">肩</option>
+          <option value="腕">腕</option>
+          <option value="脚">脚</option>
+          <option value="腹">腹</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+        <button class="btn btn-primary" onclick="saveCustomExercise()">追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Toast Container ===== -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+  <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.warn('SW registration failed:', err));
+      });
+    }
+  </script>
+</body>
+
+</html>

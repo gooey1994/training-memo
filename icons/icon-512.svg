@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="80" fill="#0a0a0a"/>
+  <g transform="translate(256,256)">
+    <!-- Dumbbell -->
+    <rect x="-160" y="-20" width="320" height="40" rx="10" fill="#e53935"/>
+    <rect x="-186" y="-74" width="52" height="148" rx="14" fill="#ff1744"/>
+    <rect x="134" y="-74" width="52" height="148" rx="14" fill="#ff1744"/>
+    <rect x="-202" y="-54" width="32" height="108" rx="10" fill="#b71c1c"/>
+    <rect x="170" y="-54" width="32" height="108" rx="10" fill="#b71c1c"/>
+    <!-- Flame accent -->
+    <path d="M0,-146 C22,-120 42,-94 32,-54 C48,-74 58,-48 48,-14 C64,-32 74,-6 54,32 C38,58 16,70 0,74 C-16,70 -38,58 -54,32 C-74,-6 -64,-32 -48,-14 C-58,-48 -48,-74 -32,-54 C-42,-94 -22,-120 0,-146Z" fill="#e53935" opacity="0.6"/>
+  </g>
+</svg>
