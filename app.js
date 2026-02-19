@@ -246,7 +246,7 @@ function populateExerciseSelect(selectEl) {
 
 function addExerciseEntry() {
   const id = uuid();
-  currentExerciseEntries.push({ id, name: '', bodyPart: '', sets: [{ weight: '', reps: '' }] });
+  currentExerciseEntries.push({ id, name: '', bodyPart: '', sets: [{ weight: '', reps: '', memo: '' }] });
   renderExerciseEntries();
 }
 
@@ -274,6 +274,8 @@ function renderExerciseEntries() {
                value="${set.weight}" data-entry="${entry.id}" data-set="${si}" data-field="weight">
         <input type="number" class="set-input" placeholder="回" min="0"
                value="${set.reps}" data-entry="${entry.id}" data-set="${si}" data-field="reps">
+        <input type="text" class="set-input set-memo" placeholder="メモ"
+               value="${set.memo || ''}" data-entry="${entry.id}" data-set="${si}" data-field="memo">
         <button class="btn btn-danger btn-icon" onclick="removeSet('${entry.id}', ${si})" title="削除">✕</button>
       </div>
     `).join('');
@@ -294,7 +296,7 @@ function renderExerciseEntries() {
         </div>
         <div class="set-list">
           <div class="set-header">
-            <div>SET</div><div>重量</div><div>回数</div><div></div>
+            <div>SET</div><div>重量</div><div>回数</div><div>メモ</div><div></div>
           </div>
           ${setsHtml}
         </div>
@@ -340,7 +342,7 @@ function addSet(entryId) {
   if (!entry) return;
   // Copy weight from last set for convenience
   const lastSet = entry.sets[entry.sets.length - 1];
-  entry.sets.push({ weight: lastSet ? lastSet.weight : '', reps: '' });
+  entry.sets.push({ weight: lastSet ? lastSet.weight : '', reps: '', memo: '' });
   renderExerciseEntries();
 }
 
@@ -376,7 +378,8 @@ function saveSession() {
         .filter(s => s.weight !== '' && s.reps !== '')
         .map(s => ({
           weight: parseFloat(s.weight) || 0,
-          reps: parseInt(s.reps) || 0
+          reps: parseInt(s.reps) || 0,
+          memo: s.memo || ''
         }))
     }))
   };
@@ -452,6 +455,7 @@ function renderHistory() {
           <span class="set-label">Set ${i + 1}</span>
           <span>${st.weight} kg</span>
           <span>${st.reps} 回</span>
+          ${st.memo ? `<span class="set-memo-text">📝 ${st.memo}</span>` : ''}
         </div>
       `).join('');
       return `
