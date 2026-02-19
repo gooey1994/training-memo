@@ -1103,10 +1103,25 @@ body::before {
     gap: 8px;
   }
 
-  .set-header,
-  .set-row {
+  .set-header {
     grid-template-columns: 36px 1fr 1fr 36px;
     gap: 6px;
+  }
+
+  .set-header div:nth-child(4) {
+    display: none;
+  }
+
+  .set-row {
+    display: grid;
+    grid-template-columns: 36px 1fr 1fr 36px;
+    grid-template-rows: auto auto;
+    gap: 6px;
+  }
+
+  .set-row .set-memo {
+    grid-column: 2 / -1;
+    text-align: left;
   }
 }
 
