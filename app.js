@@ -48,6 +48,7 @@ let exercises = {};  // { name: bodyPart }
 let sessions = [];   // [ { id, date, exercises: [ { name, bodyPart, sets: [{weight,reps}] } ] } ]
 let chartInstance = null;
 let volumeChartInstance = null;
+let editingSessionId = null;  // null = new session, string = editing existing session
 
 // ==================== STORAGE ====================
 function loadData() {
@@ -378,31 +379,89 @@ function saveSession() {
     return;
   }
 
-  const session = {
-    id: uuid(),
-    date,
-    exercises: validEntries.map(e => ({
-      name: e.name,
-      bodyPart: e.bodyPart,
-      sets: e.sets
-        .filter(s => s.weight !== '' && s.reps !== '')
-        .map(s => ({
-          weight: parseFloat(s.weight) || 0,
-          reps: parseInt(s.reps) || 0,
-          memo: s.memo || ''
-        }))
-    }))
-  };
+  const sessionExercises = validEntries.map(e => ({
+    name: e.name,
+    bodyPart: e.bodyPart,
+    sets: e.sets
+      .filter(s => s.weight !== '' && s.reps !== '')
+      .map(s => ({
+        weight: parseFloat(s.weight) || 0,
+        reps: parseInt(s.reps) || 0,
+        memo: s.memo || ''
+      }))
+  }));
 
-  sessions.push(session);
-  saveData();
-  showToast('トレーニングを保存しました！', '🎉');
+  if (editingSessionId) {
+    // Update existing session
+    const idx = sessions.findIndex(s => s.id === editingSessionId);
+    if (idx !== -1) {
+      sessions[idx].date = date;
+      sessions[idx].exercises = sessionExercises;
+    }
+    saveData();
+    showToast('トレーニングを更新しました！', '✅');
+  } else {
+    // Create new session
+    const session = {
+      id: uuid(),
+      date,
+      exercises: sessionExercises
+    };
+    sessions.push(session);
+    saveData();
+    showToast('トレーニングを保存しました！', '🎉');
+  }
 
   // Reset
+  resetRecordPage();
+}
+
+function editSession(id) {
+  const session = sessions.find(s => s.id === id);
+  if (!session) return;
+
+  editingSessionId = id;
+
+  // Load date
+  document.getElementById('record-date').value = session.date;
+  updateDateWeekday();
+
+  // Load exercises into form
+  currentExerciseEntries = session.exercises.map(ex => ({
+    id: uuid(),
+    name: ex.name,
+    bodyPart: ex.bodyPart,
+    sets: ex.sets.map(st => ({
+      weight: st.weight.toString(),
+      reps: st.reps.toString(),
+      memo: st.memo || ''
+    }))
+  }));
+
+  renderExerciseEntries();
+  updateRecordPageMode();
+  navigateTo('record');
+}
+
+function resetRecordPage() {
+  editingSessionId = null;
   currentExerciseEntries = [];
   renderExerciseEntries();
   document.getElementById('record-date').value = new Date().toISOString().split('T')[0];
   updateDateWeekday();
+  updateRecordPageMode();
+}
+
+function updateRecordPageMode() {
+  const btnText = document.getElementById('btn-save-text');
+  const heading = document.querySelector('#record > h2');
+  if (editingSessionId) {
+    if (btnText) btnText.textContent = 'セッションを更新';
+    if (heading) heading.innerHTML = '<span class="icon">✏️</span> トレーニング編集';
+  } else {
+    if (btnText) btnText.textContent = 'セッションを保存';
+    if (heading) heading.innerHTML = '<span class="icon">✏️</span> トレーニング記録';
+  }
 }
 
 // ==================== CUSTOM EXERCISE MODAL ====================
@@ -487,6 +546,7 @@ function renderHistory() {
             <div class="history-card-tags">${parts.map(p => `<span class="history-card-tag">${p}</span>`).join('')}</div>
           </div>
           <div class="history-card-actions">
+            <button class="btn btn-secondary btn-icon" onclick="event.stopPropagation(); editSession('${s.id}')" title="編集">✏️</button>
             <button class="btn btn-danger btn-icon" onclick="event.stopPropagation(); deleteSession('${s.id}')" title="削除">🗑</button>
           </div>
         </div>
